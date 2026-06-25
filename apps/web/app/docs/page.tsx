@@ -12,7 +12,6 @@ export default function DocsPage() {
     { id: "dca", label: "DCA Automations" },
     { id: "twap", label: "TWAP Order Splits" },
     { id: "grid", label: "Grid Bots" },
-    { id: "builder", label: "Developer & Builder Fees" },
   ];
 
   return (
@@ -113,19 +112,6 @@ export default function DocsPage() {
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Execution details</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                 When the price drops to a buy grid line, the bot executes a buy order and instantly sets a sell order on the grid line above it. Conversely, when the price rises, it sells and places a buy order on the line below. This harvests profits continuously in rangebound sideways markets.
-              </p>
-            </div>
-          )}
-
-          {activeSection === "builder" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Developer & Builder Fees</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                Ember is built to be a primary monetization engine for frontends, brokers, and developers building on HotStuff L1.
-              </p>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Broker Setup</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                Developers can sign a `approveBrokerFee` action. Once registered, all orders submitted under your developer referrer tag include a custom fee of up to 1.00% (100 BPS), allowing you to construct sustainable businesses on top of our execution layer.
               </p>
             </div>
           )}

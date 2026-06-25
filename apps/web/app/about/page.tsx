@@ -58,8 +58,8 @@ export default function AboutPage() {
             },
             {
               icon: Award,
-              title: "Builder Revenue",
-              desc: "We encourage open innovation. Developers who refer strategies or embed Ember earn up to a 1% custom maker fee rebate dynamically.",
+              title: "Algorithmic Precision",
+              desc: "Minimize execution slippage and optimize entry points using mathematical DCA distribution and TWAP slice algorithms.",
             },
           ].map((item, idx) => {
             const Icon = item.icon;
