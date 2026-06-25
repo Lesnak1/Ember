@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { DcaConfig, TwapConfig, GridConfig, HotstuffOrder, HotstuffBrokerConfig } from "@ember/types";
 
-// Convert builder fee BPS to decimal (e.g. 3 BPS -> "0.0003")
+// Convert broker fee BPS to decimal (e.g. 3 BPS -> "0.0003")
 export function bpsToDecimalString(bps: number): string {
   return new BigNumber(bps).dividedBy(10000).toString();
 }
