@@ -162,9 +162,6 @@ export default function HeaderComponent() {
               <Link href="/portfolio" className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors text-sm font-semibold">
                 Portfolio
               </Link>
-              <Link href="/builder" className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors text-sm font-semibold">
-                Builder Console
-              </Link>
               <Link href="/about" className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors text-sm font-semibold">
                 About
               </Link>
@@ -224,13 +221,6 @@ export default function HeaderComponent() {
               className="text-gray-600 dark:text-gray-350 hover:text-gray-900 dark:hover:text-white font-semibold text-sm py-1"
             >
               Portfolio
-            </Link>
-            <Link
-              href="/builder"
-              onClick={() => setIsMobileOpen(false)}
-              className="text-gray-600 dark:text-gray-350 hover:text-gray-900 dark:hover:text-white font-semibold text-sm py-1"
-            >
-              Builder Console
             </Link>
             <Link
               href="/about"

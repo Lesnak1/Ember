@@ -68,12 +68,6 @@ export default function LandingPage() {
               Launch Autopilots
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link
-              href="/builder"
-              className="px-8 py-4 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-white transition-colors font-bold flex items-center justify-center"
-            >
-              Builder Rewards
-            </Link>
           </div>
         </div>
 
@@ -270,12 +264,11 @@ export default function LandingPage() {
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-4xl mx-auto">
         {[
           { label: "Target Monthly Vol", value: "$50M+" },
           { label: "Maker Rebate Target", value: "-0.002%" },
           { label: "L1 Block Time", value: "75ms" },
-          { label: "Builder Rewards Pool", value: "2M Pts" },
         ].map((stat, idx) => (
           <div key={idx} className="glass-panel rounded-2xl p-6 text-center neon-border-indigo transition-all duration-300 hover:scale-[1.02]">
             <div className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
