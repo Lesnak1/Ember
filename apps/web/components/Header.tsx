@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useDisconnect, useSignMessage } from "wagmi";
-import { SiweMessage } from "siwe";
+import { SiweMessage, generateNonce } from "siwe";
 import { useAuthStore } from "../lib/store";
 import { API_URL } from "../lib/config";
 import { Sun, Moon, Menu, X } from "lucide-react";
@@ -44,7 +44,7 @@ export default function HeaderComponent() {
       if (isConnected && address && (!isAuthenticated || userAddress?.toLowerCase() !== address.toLowerCase())) {
         try {
           setIsSigning(true);
-          const nonce = Math.floor(Math.random() * 1000000).toString();
+          const nonce = generateNonce();
           
           // 1. Generate challenge message
           const rawMessage = new SiweMessage({
