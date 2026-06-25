@@ -18,6 +18,7 @@ export default function StrategiesPage() {
   const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [systemConfig, setSystemConfig] = useState<any>(null);
 
   // Create Form State
   const [strategyType, setStrategyType] = useState<"DCA" | "TWAP" | "GRID">("DCA");
@@ -58,6 +59,15 @@ export default function StrategiesPage() {
         // Assume active if returned details are solid
         setAgentWallet(data?.account ? { address: data.account, status: "ACTIVE" } : null);
       }
+
+      // Fetch system configuration
+      const configRes = await fetch(`${API_URL}/broker/config`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (configRes.ok) {
+        const data = await configRes.json();
+        setSystemConfig(data);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -92,8 +102,8 @@ export default function StrategiesPage() {
       const domain = {
         name: "HotstuffCore",
         version: "1",
-        chainId: 1,
-        verifyingContract: "0x1234567890123456789012345678901234567890" as `0x${string}`,
+        chainId: systemConfig?.chainId ?? 1,
+        verifyingContract: (systemConfig?.verifyingContract ?? "0x1234567890123456789012345678901234567890") as `0x${string}`,
       };
 
       const types = {
@@ -119,7 +129,7 @@ export default function StrategiesPage() {
       const payloadHash = keccak256(actionBytes);
 
       const message = {
-        source: "Testnet",
+        source: systemConfig?.source ?? "Testnet",
         hash: payloadHash,
         txType: 1201, // addAgent opcode
       };
@@ -204,7 +214,7 @@ export default function StrategiesPage() {
         body: JSON.stringify({
           type: strategyType,
           instrumentIds: [instrumentId],
-          brokerFeeBps: 3, // 3 BPS
+          brokerFeeBps: systemConfig?.defaultBrokerFeeBps ?? 3,
           config,
         }),
       });

@@ -110,11 +110,15 @@ export class AgentService {
     const actionBytes = encode(action);
     const payloadHash = keccak256(actionBytes);
 
+    const chainId = process.env.HOTSTUFF_CHAIN_ID ? parseInt(process.env.HOTSTUFF_CHAIN_ID, 10) : 1;
+    const verifyingContract = (process.env.HOTSTUFF_VERIFYING_CONTRACT || "0x1234567890123456789012345678901234567890") as `0x${string}`;
+    const source = process.env.HOTSTUFF_SOURCE || (process.env.HOTSTUFF_ENV === "mainnet" ? "Mainnet" : "Testnet");
+
     const domain = {
       name: "HotstuffCore",
       version: "1",
-      chainId: 1,
-      verifyingContract: "0x1234567890123456789012345678901234567890" as `0x${string}`,
+      chainId,
+      verifyingContract,
     };
 
     const types = {
@@ -126,7 +130,7 @@ export class AgentService {
     };
 
     const message = {
-      source: "Testnet",
+      source,
       hash: payloadHash,
       txType: 1201,
     };

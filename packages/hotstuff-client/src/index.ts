@@ -15,16 +15,30 @@ export interface ClientConfig {
 export class HotstuffClient {
   private privateKey?: `0x${string}`;
   private env: "testnet" | "mainnet";
-  private endpoints: typeof HOTSTUFF_ENDPOINTS[keyof typeof HOTSTUFF_ENDPOINTS];
+  private endpoints: { rest: string; wss: string; source: string };
   private verifyingContract: `0x${string}`;
   private chainId: number;
 
   constructor(config: ClientConfig) {
     this.privateKey = config.privateKey;
     this.env = config.env;
-    this.endpoints = HOTSTUFF_ENDPOINTS[config.env];
-    this.verifyingContract = config.verifyingContract || DEFAULT_VERIFYING_CONTRACT as `0x${string}`;
-    this.chainId = config.chainId || DEFAULT_CHAIN_ID;
+    
+    // Support overriding REST/WSS/source dynamically from environment variables
+    const defaultEndpoints = HOTSTUFF_ENDPOINTS[config.env];
+    this.endpoints = {
+      rest: (typeof process !== "undefined" && process.env.HOTSTUFF_REST_URL) || defaultEndpoints.rest,
+      wss: (typeof process !== "undefined" && process.env.HOTSTUFF_WSS_URL) || defaultEndpoints.wss,
+      source: (typeof process !== "undefined" && process.env.HOTSTUFF_SOURCE) || defaultEndpoints.source,
+    };
+
+    // Support overriding verifyingContract and chainId dynamically from environment variables
+    this.verifyingContract = config.verifyingContract ||
+      (typeof process !== "undefined" && process.env.HOTSTUFF_VERIFYING_CONTRACT as `0x${string}`) ||
+      DEFAULT_VERIFYING_CONTRACT as `0x${string}`;
+
+    this.chainId = config.chainId ||
+      (typeof process !== "undefined" && process.env.HOTSTUFF_CHAIN_ID ? parseInt(process.env.HOTSTUFF_CHAIN_ID, 10) : undefined) ||
+      DEFAULT_CHAIN_ID;
   }
 
   // --- Sign Action ---

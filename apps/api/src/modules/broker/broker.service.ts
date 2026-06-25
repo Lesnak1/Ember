@@ -11,6 +11,18 @@ export class BrokerService {
     return new HotstuffClient({ env });
   }
 
+  getConfig() {
+    const env = process.env.HOTSTUFF_ENV || "testnet";
+    return {
+      brokerAddress: process.env.BROKER_ADDRESS || "0x1234567890123456789012345678901234567890",
+      defaultBrokerFeeBps: process.env.DEFAULT_BROKER_FEE_BPS ? parseInt(process.env.DEFAULT_BROKER_FEE_BPS, 10) : 3,
+      maxBrokerFeeBps: process.env.MAX_BROKER_FEE_BPS ? parseInt(process.env.MAX_BROKER_FEE_BPS, 10) : 10,
+      chainId: process.env.HOTSTUFF_CHAIN_ID ? parseInt(process.env.HOTSTUFF_CHAIN_ID, 10) : 1,
+      verifyingContract: process.env.HOTSTUFF_VERIFYING_CONTRACT || "0x1234567890123456789012345678901234567890",
+      source: process.env.HOTSTUFF_SOURCE || (env === "mainnet" ? "Mainnet" : "Testnet"),
+    };
+  }
+
   async registerBrokerApproval(
     userId: string,
     broker: string,
@@ -21,6 +33,13 @@ export class BrokerService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException("User not found");
+    }
+
+    // Validate proposed maxFeeRate against MAX_BROKER_FEE_BPS
+    const config = this.getConfig();
+    const maxAllowedRate = config.maxBrokerFeeBps / 10000;
+    if (parseFloat(maxFeeRate) > maxAllowedRate) {
+      throw new BadRequestException(`Proposed max fee rate of ${maxFeeRate} exceeds the maximum allowed limit of ${maxAllowedRate} (${config.maxBrokerFeeBps} BPS).`);
     }
 
     // 1. Relay to L1

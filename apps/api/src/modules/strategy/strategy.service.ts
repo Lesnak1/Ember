@@ -8,11 +8,21 @@ import Redis from "ioredis";
 export class StrategyService implements OnModuleInit {
   private strategyQueue: Queue;
   private redisConnection: Redis;
+  private redisAvailable = false;
 
   constructor(private prisma: PrismaService) {
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
     const redisOptions: any = {
       maxRetriesPerRequest: null,
+      lazyConnect: true,
+      retryStrategy: (times: number) => {
+        if (times > 3) {
+          console.warn("Redis unavailable after 3 retries in StrategyService. Queue disabled.");
+          return null; // Stop retrying
+        }
+        return Math.min(times * 1000, 5000);
+      },
+      enableOfflineQueue: false,
     };
     if (redisUrl.startsWith("rediss://")) {
       redisOptions.tls = {
@@ -21,14 +31,26 @@ export class StrategyService implements OnModuleInit {
     }
     this.redisConnection = new Redis(redisUrl, redisOptions);
     this.redisConnection.on("error", (err) => {
-      console.error("Redis connection error in StrategyService:", err);
+      if (this.redisAvailable) {
+        console.error("Redis connection error in StrategyService:", err.message);
+      }
+    });
+    this.redisConnection.on("connect", () => {
+      this.redisAvailable = true;
+      console.log("Redis connected successfully in StrategyService.");
     });
   }
 
-  onModuleInit() {
-    this.strategyQueue = new Queue("strategy-execution-queue", {
-      connection: this.redisConnection as any,
-    });
+  async onModuleInit() {
+    try {
+      await this.redisConnection.connect();
+      this.strategyQueue = new Queue("strategy-execution-queue", {
+        connection: this.redisConnection as any,
+      });
+      console.log("Strategy queue initialized successfully.");
+    } catch (err: any) {
+      console.warn(`Redis not available — strategy queue disabled: ${err.message}`);
+    }
   }
 
   // --- Validate Strategy Configuration ---
@@ -51,6 +73,12 @@ export class StrategyService implements OnModuleInit {
   // --- CRUD & Scheduling ---
   async create(userId: string, input: CreateStrategyInput): Promise<any> {
     this.validateConfig(input.type, input.config);
+
+    // Validate broker fee BPS against max allowed from env
+    const maxBps = process.env.MAX_BROKER_FEE_BPS ? parseInt(process.env.MAX_BROKER_FEE_BPS, 10) : 10;
+    if (input.brokerFeeBps > maxBps) {
+      throw new BadRequestException(`Broker fee BPS (${input.brokerFeeBps}) exceeds the maximum allowed limit of ${maxBps} BPS.`);
+    }
 
     // Save to Database
     const strategy = await this.prisma.strategy.create({
@@ -139,6 +167,10 @@ export class StrategyService implements OnModuleInit {
 
   // --- BullMQ Scheduling Implementations ---
   private async scheduleJob(strategy: any) {
+    if (!this.strategyQueue) {
+      console.warn("Strategy queue not available (Redis disabled). Skipping scheduling.");
+      return;
+    }
     const config = strategy.configJson as any;
     let intervalMs = 60 * 1000; // Default 1 minute fallback
 
@@ -166,6 +198,7 @@ export class StrategyService implements OnModuleInit {
   }
 
   private async unscheduleJob(strategy: any) {
+    if (!this.strategyQueue) return;
     // BullMQ stores repeatable jobs with repeat keys. We can fetch and remove it.
     const repeatableJobs = await this.strategyQueue.getRepeatableJobs();
     const target = repeatableJobs.find((job) => job.id === strategy.id);

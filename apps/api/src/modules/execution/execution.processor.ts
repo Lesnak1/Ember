@@ -12,6 +12,7 @@ export class ExecutionProcessor implements OnModuleInit {
   private readonly logger = new Logger(ExecutionProcessor.name);
   private worker: Worker;
   private redisConnection: Redis;
+  private redisAvailable = false;
 
   constructor(
     private prisma: PrismaService,
@@ -20,6 +21,15 @@ export class ExecutionProcessor implements OnModuleInit {
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
     const redisOptions: any = {
       maxRetriesPerRequest: null,
+      lazyConnect: true,
+      retryStrategy: (times: number) => {
+        if (times > 3) {
+          this.logger.warn("Redis unavailable after 3 retries. Strategy queue disabled.");
+          return null; // Stop retrying
+        }
+        return Math.min(times * 1000, 5000);
+      },
+      enableOfflineQueue: false,
     };
     if (redisUrl.startsWith("rediss://")) {
       redisOptions.tls = {
@@ -28,23 +38,33 @@ export class ExecutionProcessor implements OnModuleInit {
     }
     this.redisConnection = new Redis(redisUrl, redisOptions);
     this.redisConnection.on("error", (err) => {
-      this.logger.error(`Redis connection error in ExecutionProcessor: ${err.message}`, err.stack);
+      if (this.redisAvailable) {
+        this.logger.error(`Redis connection error in ExecutionProcessor: ${err.message}`);
+      }
+    });
+    this.redisConnection.on("connect", () => {
+      this.redisAvailable = true;
+      this.logger.log("Redis connected successfully in ExecutionProcessor.");
     });
   }
 
-  onModuleInit() {
-    this.worker = new Worker(
-      "strategy-execution-queue",
-      async (job: Job) => {
-        await this.processStrategyRun(job.data.strategyId);
-      },
-      {
-        connection: this.redisConnection as any,
-        concurrency: 5, // Concurrent strategy executions
-      }
-    );
-
-    this.logger.log("Execution queue worker initialized successfully.");
+  async onModuleInit() {
+    try {
+      await this.redisConnection.connect();
+      this.worker = new Worker(
+        "strategy-execution-queue",
+        async (job: Job) => {
+          await this.processStrategyRun(job.data.strategyId);
+        },
+        {
+          connection: this.redisConnection as any,
+          concurrency: 5,
+        }
+      );
+      this.logger.log("Execution queue worker initialized successfully.");
+    } catch (err: any) {
+      this.logger.warn(`Redis not available — execution queue worker disabled: ${err.message}`);
+    }
   }
 
   private async processStrategyRun(strategyId: string) {
