@@ -55,7 +55,7 @@ export class BrokerService {
     }
   }
 
-  async claimRewards(
+  async claimBrokerFees(
     userId: string,
     collateralId: number,
     spot: boolean,
@@ -81,8 +81,8 @@ export class BrokerService {
     try {
       const result = await client.submitPresignedAction(action, signature, nonce);
 
-      // 2. Save in LedgerBuilderFee
-      await this.prisma.ledgerBuilderFee.create({
+      // 2. Save in LedgerBrokerFee
+      await this.prisma.ledgerBrokerFee.create({
         data: {
           period: new Date().toISOString().substring(0, 7), // "YYYY-MM"
           grossFee: "0", // Gross amount is tracked on L1, we log claim event locally
@@ -96,7 +96,7 @@ export class BrokerService {
         result,
       };
     } catch (err: any) {
-      throw new BadRequestException(`Failed to relay claim rewards to L1: ${err.message}`);
+      throw new BadRequestException(`Failed to relay claim broker fees to L1: ${err.message}`);
     }
   }
 }

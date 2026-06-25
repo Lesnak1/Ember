@@ -2,7 +2,7 @@
 
 Ember is a 100% non-custodial automated trading terminal built on the high-performance **HotStuff Layer-1 (DracoBFT consensus)**. It enables users to deploy automated grid bots, recurring DCA investment strategies, and smart order execution splits (TWAP) on tokenized stocks, crypto, and RWAs. 
 
-Ember integrates with the HotStuff L1 Builder Program, embedding a broker configuration into each executed transaction to generate on-chain yield.
+Ember integrates with the HotStuff L1 broker system, embedding a broker configuration into each executed transaction to automate secure trading operations.
 
 ---
 
@@ -12,7 +12,6 @@ Ember integrates with the HotStuff L1 Builder Program, embedding a broker config
 - **Smart TWAP & Execution:** Split large orders into multiple slices over time to capture maker rebates and reduce slippage.
 - **Grid Bots:** Deploy buy/sell limit order grids to extract yield from flat, rangebound consolidation phases.
 - **Non-Custodial Security Model:** Scoped Agent wallets sign trading orders programmatically. Withdrawals and transfers are strictly unauthorized.
-- **Builder Dashboard:** Live tracking of broker fee approvals and on-chain fee claim/relays.
 
 ---
 
@@ -66,10 +65,10 @@ HOTSTUFF_WSS_URL=wss://testnet-api.hotstuff.trade/ws
 HOTSTUFF_CHAIN_ID=1
 HOTSTUFF_VERIFYING_CONTRACT=0x1234567890123456789012345678901234567890
 
-# Builder Configuration
-BUILDER_ADDRESS=0xYOUR_BUILDER_PUBLIC_ADDRESS
-DEFAULT_BUILDER_FEE_BPS=3
-MAX_BUILDER_FEE_BPS=10
+# Broker Configuration
+BROKER_ADDRESS=0xYOUR_BROKER_PUBLIC_ADDRESS
+DEFAULT_BROKER_FEE_BPS=3
+MAX_BROKER_FEE_BPS=10
 
 # Agent Security & Encryption (32-character key)
 AGENT_ENC_SECRET=ember-default-agent-encryption-secret-32-chars

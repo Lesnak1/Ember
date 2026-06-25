@@ -26,7 +26,7 @@ export class BrokerController {
   }
 
   @Post("claim")
-  async claimRewards(
+  async claimBrokerFees(
     @Req() req: AuthenticatedRequest,
     @Body("collateralId") collateralId: number,
     @Body("spot") spot: boolean,
@@ -34,7 +34,7 @@ export class BrokerController {
     @Body("signature") signature: string
   ) {
     const userId = req.user.sub;
-    return this.brokerService.claimRewards(
+    return this.brokerService.claimBrokerFees(
       userId,
       collateralId,
       spot,

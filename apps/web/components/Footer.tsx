@@ -18,7 +18,7 @@ export default function FooterComponent() {
               </span>
             </Link>
             <p className="text-xs text-gray-500 max-w-xs leading-relaxed">
-              Autonomous non-custodial execution engine on HotStuff L1. Secure, fast, and builder fee optimized.
+              Autonomous non-custodial execution engine on HotStuff L1. Secure, fast, and execution optimized.
             </p>
           </div>
 
@@ -34,11 +34,6 @@ export default function FooterComponent() {
               <li>
                 <Link href="/portfolio" className="hover:text-white transition-colors">
                   Portfolio
-                </Link>
-              </li>
-              <li>
-                <Link href="/builder" className="hover:text-white transition-colors">
-                  Developer Console
                 </Link>
               </li>
             </ul>

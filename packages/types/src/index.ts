@@ -71,7 +71,7 @@ export type GridConfig = z.infer<typeof GridConfigSchema>;
 export const CreateStrategySchema = z.object({
   type: StrategyTypeSchema,
   instrumentIds: z.array(z.number().int()),
-  builderFeeBps: z.number().int().min(0).max(100).default(3), // Default 3 bps
+  brokerFeeBps: z.number().int().min(0).max(100).default(3), // Default 3 bps
   config: z.record(z.any()), // Checked dynamically based on Type
 });
 export type CreateStrategyInput = z.infer<typeof CreateStrategySchema>;

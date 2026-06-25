@@ -204,7 +204,7 @@ export default function StrategiesPage() {
         body: JSON.stringify({
           type: strategyType,
           instrumentIds: [instrumentId],
-          builderFeeBps: 3, // 3 BPS
+          brokerFeeBps: 3, // 3 BPS
           config,
         }),
       });

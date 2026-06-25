@@ -25,7 +25,7 @@ export class PortfolioService {
 
   async checkBrokerFeeApproval(address: string, brokerAddress?: string): Promise<any> {
     const client = this.getClient();
-    const broker = brokerAddress || process.env.BUILDER_ADDRESS || "0x1234567890123456789012345678901234567890";
+    const broker = brokerAddress || process.env.BROKER_ADDRESS || "0x1234567890123456789012345678901234567890";
     return client.brokersCheck(address, broker);
   }
 }

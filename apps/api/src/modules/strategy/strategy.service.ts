@@ -51,7 +51,7 @@ export class StrategyService implements OnModuleInit {
         status: "ACTIVE",
         configJson: input.config,
         instrumentIds: input.instrumentIds,
-        builderFeeBps: input.builderFeeBps,
+        brokerFeeBps: input.brokerFeeBps,
       },
     });
 

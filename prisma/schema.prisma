@@ -39,7 +39,7 @@ model BrokerApproval {
   id         String    @id @default(uuid())
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  broker     String    // Broker (builder) address
+  broker     String    // Broker address
   maxFeeRate String    // Max approved fee rate (e.g. "0.0010")
   approvedAt DateTime  @default(now())
   revokedAt  DateTime?
@@ -55,7 +55,7 @@ model Strategy {
   status        String        // "ACTIVE", "PAUSED", "COMPLETED", "FAILED"
   configJson    Json          // Strategy specific config params
   instrumentIds Int[]         // Associated instrument IDs
-  builderFeeBps Int           @default(3) // Fee in BPS
+  brokerFeeBps Int           @default(3) // Fee in BPS
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   runs          StrategyRun[]
@@ -115,7 +115,7 @@ model Fill {
   @@index([userId])
 }
 
-model LedgerBuilderFee {
+model LedgerBrokerFee {
   id            String    @id @default(uuid())
   period        String    // e.g. "2026-06"
   grossFee      String

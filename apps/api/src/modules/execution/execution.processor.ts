@@ -96,8 +96,8 @@ export class ExecutionProcessor implements OnModuleInit {
       }
 
       // 5. Generate and execute orders based on strategy type
-      const brokerAddress = process.env.BUILDER_ADDRESS || "0x1234567890123456789012345678901234567890";
-      const brokerConfig = generateBrokerConfig(brokerAddress, strategy.builderFeeBps);
+      const brokerAddress = process.env.BROKER_ADDRESS || "0x1234567890123456789012345678901234567890";
+      const brokerConfig = generateBrokerConfig(brokerAddress, strategy.brokerFeeBps);
       const ordersToPlace: any[] = [];
 
       if (strategy.type === "DCA") {
