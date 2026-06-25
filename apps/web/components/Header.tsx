@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useDisconnect, useSignTypedData } from "wagmi";
+import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 import { SiweMessage } from "siwe";
 import { useAuthStore } from "../lib/store";
 import { API_URL } from "../lib/config";
@@ -12,7 +12,7 @@ import { keccak256 } from "viem";
 
 export default function HeaderComponent() {
   const { address, isConnected } = useAccount();
-  const { signTypedDataAsync } = useSignTypedData();
+  const { signMessageAsync } = useSignMessage();
   const { disconnect } = useDisconnect();
   
   const { token, userAddress, isAuthenticated, setAuth, clearAuth } = useAuthStore();
@@ -59,46 +59,9 @@ export default function HeaderComponent() {
 
           const messageText = rawMessage.prepareMessage();
           
-          // EIP-712 setup
-          const domain = {
-            name: "HotstuffCore",
-            version: "1",
-            chainId: 1,
-            verifyingContract: "0x1234567890123456789012345678901234567890" as `0x${string}`,
-          };
-
-          const types = {
-            Action: [
-              { name: "source", type: "string" },
-              { name: "hash", type: "bytes32" },
-              { name: "txType", type: "uint16" },
-            ],
-          };
-
-          const action = {
-            type: "login",
-            data: {
-              address,
-              nonce,
-              message: messageText,
-            },
-          };
-
-          const actionBytes = encode(action);
-          const payloadHash = keccak256(actionBytes);
-
-          const message = {
-            source: "Testnet",
-            hash: payloadHash,
-            txType: 1201, // Mock sign-in opcode
-          };
-
-          // 2. Sign EIP-712 structured data instead of raw text
-          const signature = await signTypedDataAsync({
-            domain,
-            types,
-            primaryType: "Action",
-            message,
+          // 2. Sign raw SIWE text message instead of EIP-712 structured data
+          const signature = await signMessageAsync({
+            message: messageText,
           });
 
           // 3. Authenticate with backend
