@@ -1,4 +1,4 @@
-# Ember (AfterHours) — Non-Custodial Automated Trading & Investment Terminal
+# Ember — Non-Custodial Automated Trading & Investment Terminal
 
 Ember is a 100% non-custodial automated trading terminal built on the high-performance **HotStuff Layer-1 (DracoBFT consensus)**. It enables users to deploy automated grid bots, recurring DCA investment strategies, and smart order execution splits (TWAP) on tokenized stocks, crypto, and RWAs. 
 
