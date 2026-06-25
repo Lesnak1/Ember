@@ -18,8 +18,17 @@ export class ExecutionProcessor implements OnModuleInit {
     private agentService: AgentService
   ) {
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-    this.redisConnection = new Redis(redisUrl, {
+    const redisOptions: any = {
       maxRetriesPerRequest: null,
+    };
+    if (redisUrl.startsWith("rediss://")) {
+      redisOptions.tls = {
+        rejectUnauthorized: false,
+      };
+    }
+    this.redisConnection = new Redis(redisUrl, redisOptions);
+    this.redisConnection.on("error", (err) => {
+      this.logger.error(`Redis connection error in ExecutionProcessor: ${err.message}`, err.stack);
     });
   }
 

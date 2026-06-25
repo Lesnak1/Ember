@@ -11,8 +11,17 @@ export class StrategyService implements OnModuleInit {
 
   constructor(private prisma: PrismaService) {
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-    this.redisConnection = new Redis(redisUrl, {
+    const redisOptions: any = {
       maxRetriesPerRequest: null,
+    };
+    if (redisUrl.startsWith("rediss://")) {
+      redisOptions.tls = {
+        rejectUnauthorized: false,
+      };
+    }
+    this.redisConnection = new Redis(redisUrl, redisOptions);
+    this.redisConnection.on("error", (err) => {
+      console.error("Redis connection error in StrategyService:", err);
     });
   }
 
