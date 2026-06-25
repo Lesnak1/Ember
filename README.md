@@ -4,6 +4,35 @@ Ember is a 100% non-custodial automated trading terminal built on the high-perfo
 
 Ember integrates with the HotStuff L1 broker system, embedding a broker configuration into each executed transaction to automate secure trading operations.
 
+## Architecture Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User Wallet
+    participant Web as Web dApp
+    participant API as NestJS Backend
+    participant L1 as HotStuff L1 Chain
+
+    User->>Web: Connect & Authenticate (SIWE)
+    Web->>API: Fetch Config (Chain ID, Contract Address)
+    API->>Web: Config Parameters
+    Web->>User: Request EIP-712 Agent Delegation (addAgent)
+    User->>Web: Sign Delegation
+    Web->>API: Register Agent + Signature
+    API->>API: Encrypt Agent Private Key (AES-256-GCM)
+    API->>L1: Relay "addAgent" Action to L1 Exchange
+    Note over API, L1: Agent wallet registered & locked on-chain
+
+    loop Automated Execution
+        Note over API: Strategy Trigger (DCA / TWAP / Grid)
+        API->>API: Decrypt Agent Private Key
+        API->>API: Generate & Sign Order (Agent Key)
+        API->>L1: Submit Signed Order + Broker Config
+        L1-->>API: Confirm Trade Execution & Fee Distribution
+    end
+```
+
 ---
 
 ## Key Features
@@ -62,7 +91,7 @@ Create a `.env` file in the root workspace directory:
 HOTSTUFF_ENV=testnet
 HOTSTUFF_REST_URL=https://testnet-api.hotstuff.trade
 HOTSTUFF_WSS_URL=wss://testnet-api.hotstuff.trade/ws
-HOTSTUFF_CHAIN_ID=1
+HOTSTUFF_CHAIN_ID=11155111
 HOTSTUFF_VERIFYING_CONTRACT=0x1234567890123456789012345678901234567890
 
 # Broker Configuration
