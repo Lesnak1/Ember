@@ -1,0 +1,150 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../apps/api/node_modules/.prisma/client"
+}
+
+model User {
+  id              String           @id @default(uuid())
+  mainAddress     String           @unique // The user's Web3 public address
+  createdAt       DateTime         @default(now())
+  settings        Json             @default("{}")
+  
+  agentWallets    AgentWallet[]
+  brokerApprovals BrokerApproval[]
+  strategies      Strategy[]
+  fills           Fill[]
+  auditLogs       AuditLog[]
+  alerts          Alert[]
+}
+
+model AgentWallet {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentAddress  String   @unique
+  encPrivKeyRef String   // Encrypted private key of the agent wallet
+  validUntil    DateTime // Expiration date/time for the agent authority
+  status        String   // "ACTIVE", "REVOKED", "EXPIRED"
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+model BrokerApproval {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  broker     String    // Broker (builder) address
+  maxFeeRate String    // Max approved fee rate (e.g. "0.0010")
+  approvedAt DateTime  @default(now())
+  revokedAt  DateTime?
+
+  @@index([userId])
+}
+
+model Strategy {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String        // "DCA", "GRID", "TWAP", etc.
+  status        String        // "ACTIVE", "PAUSED", "COMPLETED", "FAILED"
+  configJson    Json          // Strategy specific config params
+  instrumentIds Int[]         // Associated instrument IDs
+  builderFeeBps Int           @default(3) // Fee in BPS
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  runs          StrategyRun[]
+
+  @@index([userId])
+}
+
+model StrategyRun {
+  id          String       @id @default(uuid())
+  strategyId  String
+  strategy    Strategy     @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime     @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  status      String       // "PENDING", "RUNNING", "SUCCESS", "FAILED"
+  error       String?
+  childOrders ChildOrder[]
+
+  @@index([strategyId])
+}
+
+model ChildOrder {
+  id            String      @id @default(uuid())
+  strategyRunId String
+  strategyRun   StrategyRun @relation(fields: [strategyRunId], references: [id], onDelete: Cascade)
+  cloid         String      @unique // Client Order ID
+  instrumentId  Int
+  side          String      // "b" | "s"
+  price         String
+  size          String
+  tif           String      // "GTC", "IOC", etc.
+  po            Boolean     @default(false)
+  ro            Boolean     @default(false)
+  brokerFee     String?     // Broker fee rate applied to this order
+  status        String      // "PLACED", "FILLED", "CANCELLED", "REJECTED"
+  oid           String?     // L1 chain Order ID
+  txHash        String?     // Transaction hash of placement
+  fillPrice     String?
+  feePaid       String?
+  createdAt     DateTime    @default(now())
+
+  @@index([strategyRunId])
+}
+
+model Fill {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  oid          String
+  instrumentId Int
+  price        String
+  size         String
+  fee          String
+  isMaker      Boolean
+  ts           DateTime @default(now())
+
+  @@index([userId])
+}
+
+model LedgerBuilderFee {
+  id            String    @id @default(uuid())
+  period        String    // e.g. "2026-06"
+  grossFee      String
+  claimedTxHash String?
+  claimedAt     DateTime?
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String   // Description of action, e.g. "PLACE_ORDER"
+  payloadHash String   // Hash of raw action payload
+  signer      String   // Address that signed
+  ts          DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Alert {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // "MARGIN_HEALTH", "LIQUIDATION_WARN", "STRATEGY_FAIL"
+  threshold String
+  channel   String   // "EMAIL", "TELEGRAM", "IN_APP"
+  status    String   // "ACTIVE", "RESOLVED"
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

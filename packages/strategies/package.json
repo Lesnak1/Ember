@@ -1,0 +1,19 @@
+{
+  "name": "@ember/strategies",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@ember/config": "workspace:*",
+    "@ember/types": "workspace:*",
+    "@ember/hotstuff-client": "workspace:*",
+    "bignumber.js": "^9.1.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
