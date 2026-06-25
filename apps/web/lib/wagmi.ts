@@ -1,6 +1,7 @@
 import { http, createConfig } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { mainnet, sepolia, base } from "wagmi/chains";
+
 import { defineChain } from "viem";
 
 export const hotstuffChain = defineChain({
