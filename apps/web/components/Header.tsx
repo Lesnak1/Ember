@@ -87,8 +87,17 @@ export default function HeaderComponent() {
           const data = await res.json();
           // 4. Save credentials
           setAuth(data.token, address, data.user.id);
-        } catch (err) {
+        } catch (err: any) {
           console.error("SIWE Login failed:", err);
+          const errMsg = err.message || "";
+          if (
+            errMsg.includes("not authorized") ||
+            errMsg.includes("UnauthorizedProviderError") ||
+            errMsg.includes("4100") ||
+            errMsg.includes("ConnectorChainMismatchError")
+          ) {
+            alert("Wallet Connection Conflict:\nPlease disable competing wallet extensions (such as Backpack, Phantom, or Rabby) in your browser settings and keep only MetaMask enabled. Multiple active extensions hijack the provider and block transaction signing.");
+          }
           disconnect();
           clearAuth();
         } finally {
