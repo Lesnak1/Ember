@@ -27,7 +27,23 @@ async function bootstrap() {
 
   // Enable CORS for Next.js frontend
   app.enableCors({
-    origin: ["http://localhost:3000"],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://ember-web-weld.vercel.app"
+      ];
+      if (process.env.CORS_ORIGINS) {
+        allowedOrigins.push(...process.env.CORS_ORIGINS.split(","));
+      }
+      const isAllowed = allowedOrigins.some(o => o.trim().toLowerCase() === origin.toLowerCase()) || 
+                        /\.vercel\.app$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
   });
