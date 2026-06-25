@@ -60,10 +60,14 @@ export default function HeaderComponent() {
 
           const messageText = rawMessage.prepareMessage();
           
-          // 2. Sign raw SIWE text message instead of EIP-712 structured data
-          const signature = await signMessageAsync({
+          // 2. Sign raw SIWE text message with a 30-second timeout to prevent extension hang crashes
+          const signaturePromise = signMessageAsync({
             message: messageText,
           });
+          const timeoutPromise = new Promise<`0x${string}`>((_, reject) =>
+            setTimeout(() => reject(new Error("Signature request timed out (possible wallet/extension conflict)")), 30000)
+          );
+          const signature = await Promise.race([signaturePromise, timeoutPromise]);
 
           // 3. Authenticate with backend
           const res = await fetch(`${API_URL}/auth/login`, {
