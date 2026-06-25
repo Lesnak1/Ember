@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useDisconnect, useSignMessage } from "wagmi";
+import { useAccount, useDisconnect, useSignMessage, useChainId } from "wagmi";
 import { SiweMessage, generateNonce } from "siwe";
 import { useAuthStore } from "../lib/store";
 import { API_URL } from "../lib/config";
@@ -14,6 +14,7 @@ export default function HeaderComponent() {
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const { disconnect } = useDisconnect();
+  const activeChainId = useChainId();
   
   const { token, userAddress, isAuthenticated, setAuth, clearAuth } = useAuthStore();
   const [isSigning, setIsSigning] = useState(false);
@@ -53,7 +54,7 @@ export default function HeaderComponent() {
             statement: "Sign in with Ethereum to authorize Ember automation terminal.",
             uri: window.location.origin,
             version: "1",
-            chainId: 1,
+            chainId: activeChainId,
             nonce,
           });
 
